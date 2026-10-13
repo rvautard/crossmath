@@ -85,6 +85,8 @@ button {
 .cell.num.filled { color: var(--accent); }
 .cell.num.selected { outline: 3px solid #f5a623; }
 .cell.sym { color: #555; font-size: calc(var(--cell) * .5); }
+.cell.ok.num { border-color: #1a8f3c; background: #e9f8ee; }
+.cell.ok.sym { color: #1a8f3c; }
 .cell.bad.num { border-color: #d33; background: #ffecec; }
 .cell.bad.sym { color: #d33; }
 

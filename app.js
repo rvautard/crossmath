@@ -208,7 +208,6 @@ const state = {
   fill: {}, // index de case -> id de tuile
   selTile: null,
   selCell: null,
-  bad: new Set(),
   startedAt: 0,
   timerId: null,
   done: false,
@@ -243,6 +242,12 @@ function cellValue(idx) {
 function render() {
   const { rows, cols, cells } = state.puzzle;
   $("grid").style.setProperty("--cols", cols);
+  const status = new Map();
+  for (const eq of state.puzzle.eqs) {
+    const s = eqStatus(eq);
+    if (!s) continue;
+    for (const i of eq.map(idxOf)) if (s === "bad" || !status.has(i)) status.set(i, s);
+  }
   let html = "";
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -252,7 +257,7 @@ function render() {
         html += `<div class="cell block"></div>`;
         continue;
       }
-      const bad = state.bad.has(idx) ? " bad" : "";
+      const bad = status.has(idx) ? " " + status.get(idx) : "";
       if (cell.kind === "sym") {
         html += `<div class="cell sym${bad}">${cell.text}</div>`;
         continue;
@@ -283,35 +288,38 @@ function place(idx, tileId) {
   state.fill[idx] = tileId;
   state.selTile = null;
   state.selCell = null;
-  state.bad.clear();
-  setMessage("");
   render();
-  if ([...state.hidden].every((i) => state.fill[i] !== undefined)) verify();
+  checkWin();
 }
 
-function verify() {
-  state.bad.clear();
-  for (const eq of state.puzzle.eqs) {
-    const ids = eq.map(idxOf);
-    const op = state.puzzle.cells[eq[1][0]][eq[1][1]].text;
-    if (OPS[op](cellValue(ids[0]), cellValue(ids[2])) !== cellValue(ids[4])) ids.forEach((i) => state.bad.add(i));
+// "ok" ou "bad" quand les 3 nombres de l'équation sont connus, sinon null.
+function eqStatus(eq) {
+  const v = [0, 2, 4].map((i) => cellValue(idxOf(eq[i])));
+  if (v.some((x) => x === null)) return null;
+  const op = state.puzzle.cells[eq[1][0]][eq[1][1]].text;
+  return OPS[op](v[0], v[1]) === v[2] ? "ok" : "bad";
+}
+
+function checkWin() {
+  if (![...state.hidden].every((i) => state.fill[i] !== undefined)) {
+    setMessage("");
+    return;
   }
-  if (state.bad.size === 0) {
-    state.done = true;
-    clearInterval(state.timerId);
-    const secs = Math.floor((Date.now() - state.startedAt) / 1000);
-    const best = Number(localStorage.getItem("crossmath-best-" + state.configKey));
-    let msg = `Bravo ! Résolu en ${fmt(secs)}.`;
-    if (!best || secs < best) {
-      localStorage.setItem("crossmath-best-" + state.configKey, String(secs));
-      if (best) msg += " Nouveau record !";
-    }
-    setMessage(msg, "win");
-    showBest();
-  } else {
+  if (state.puzzle.eqs.some((eq) => eqStatus(eq) !== "ok")) {
     setMessage("Il y a des erreurs, regarde les équations en rouge.", "error");
+    return;
   }
-  render();
+  state.done = true;
+  clearInterval(state.timerId);
+  const secs = Math.floor((Date.now() - state.startedAt) / 1000);
+  const best = Number(localStorage.getItem("crossmath-best-" + state.configKey));
+  let msg = `Bravo ! Résolu en ${fmt(secs)}.`;
+  if (!best || secs < best) {
+    localStorage.setItem("crossmath-best-" + state.configKey, String(secs));
+    if (best) msg += " Nouveau record !";
+  }
+  setMessage(msg, "win");
+  showBest();
 }
 
 function showBest() {
@@ -355,7 +363,6 @@ function newGame() {
       fill: {},
       selTile: null,
       selCell: null,
-      bad: new Set(),
       done: false,
       startedAt: Date.now(),
       configKey: [...s.ops].sort().join("") + "-" + s.max + "-" + s.level,
@@ -379,7 +386,6 @@ function onGridClick(e) {
     place(idx, state.selTile);
   } else if (state.fill[idx] !== undefined) {
     delete state.fill[idx];
-    state.bad.clear();
     setMessage("");
     render();
   } else {
