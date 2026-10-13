@@ -1,0 +1,116 @@
+:root {
+  --accent: #3b6fd8;
+  --bg: #f4f6fb;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: #222;
+}
+
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+  text-align: center;
+}
+
+h1 { margin: 8px 0 16px; color: var(--accent); }
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+fieldset {
+  border: 1px solid #c9d2e6;
+  border-radius: 8px;
+  background: #fff;
+  padding: 4px 10px 8px;
+}
+
+legend { font-size: .8rem; color: #666; padding: 0 4px; }
+fieldset label { margin: 0 6px; font-size: 1.1rem; cursor: pointer; }
+select { font-size: 1rem; padding: 2px 6px; }
+
+.status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+  font-size: 1.1rem;
+}
+
+#best { color: #777; font-size: .9rem; }
+
+button {
+  font-size: 1rem;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+.grid {
+  --cell: min(64px, calc((min(100vw, 1000px) - 40px) / var(--cols, 9) - 3px));
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 9), var(--cell));
+  grid-auto-rows: var(--cell);
+  gap: 3px;
+  justify-content: center;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: calc(var(--cell) * .38);
+  font-weight: 600;
+  user-select: none;
+}
+
+.cell.block { background: #2b3245; }
+.cell.num { background: #fff; border: 2px solid #c9d2e6; }
+.cell.num.blank { background: #eaf0ff; border: 2px dashed var(--accent); cursor: pointer; }
+.cell.num.filled { color: var(--accent); }
+.cell.num.selected { outline: 3px solid #f5a623; }
+.cell.sym { color: #555; font-size: calc(var(--cell) * .5); }
+.cell.bad.num { border-color: #d33; background: #ffecec; }
+.cell.bad.sym { color: #d33; }
+
+.bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  min-height: 56px;
+  margin-top: 20px;
+}
+
+.tile {
+  min-width: 56px;
+  padding: 10px 12px;
+  font-size: 1.3rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background: #fff;
+  border: 2px solid var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.tile.selected { background: #f5a623; border-color: #f5a623; color: #fff; }
+
+.message { min-height: 1.5em; font-size: 1.2rem; font-weight: 600; }
+.message.win { color: #1a8f3c; }
+.message.error { color: #d33; }

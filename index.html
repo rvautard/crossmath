@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cross Math</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Cross Math</h1>
+
+    <section class="settings">
+      <fieldset>
+        <legend>Opérations</legend>
+        <label><input type="checkbox" name="op" value="+" checked> +</label>
+        <label><input type="checkbox" name="op" value="−" checked> −</label>
+        <label><input type="checkbox" name="op" value="×"> ×</label>
+        <label><input type="checkbox" name="op" value="÷"> ÷</label>
+      </fieldset>
+      <fieldset>
+        <legend>Nombre maximum</legend>
+        <label><input type="radio" name="max" value="20"> 20</label>
+        <label><input type="radio" name="max" value="100" checked> 100</label>
+        <label><input type="radio" name="max" value="500"> 500</label>
+        <label><input type="radio" name="max" value="1000"> 1000</label>
+      </fieldset>
+      <fieldset>
+        <legend>Difficulté</legend>
+        <select id="difficulty">
+          <option value="easy">Facile</option>
+          <option value="medium" selected>Moyen</option>
+          <option value="hard">Difficile</option>
+        </select>
+      </fieldset>
+    </section>
+
+    <section class="status">
+      <span>Temps : <strong id="timer">00:00</strong></span>
+      <span id="best"></span>
+      <button id="new-game" type="button">Nouvelle grille</button>
+    </section>
+
+    <div id="grid" class="grid" aria-label="Grille"></div>
+    <div id="bank" class="bank" aria-label="Nombres disponibles"></div>
+    <p id="message" class="message" role="status"></p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
