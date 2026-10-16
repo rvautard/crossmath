@@ -106,9 +106,9 @@ function fits(op, fx, max) {
 
 // Place une équation de 5 cases à partir de (r, c) dans la direction dir ("H" ou "V").
 // Les croisements ne se font que sur des cases-nombres, et deux équations ne se touchent jamais autrement.
-function tryPlace(grid, size, ops, max, r, c, dir) {
+function tryPlace(grid, rows, cols, ops, max, r, c, dir) {
   const [dr, dc] = dir === "H" ? [0, 1] : [1, 0];
-  const inside = (y, x) => y >= 0 && y < size && x >= 0 && x < size;
+  const inside = (y, x) => y >= 0 && y < rows && x >= 0 && x < cols;
   if (!inside(r, c) || !inside(r + 4 * dr, c + 4 * dc)) return null;
   for (const [y, x] of [[r - dr, c - dc], [r + 5 * dr, c + 5 * dc]]) {
     if (inside(y, x) && grid[y][x]) return null;
@@ -145,20 +145,20 @@ function tryPlace(grid, size, ops, max, r, c, dir) {
   return null;
 }
 
-function build(ops, max, size, target) {
-  const grid = Array.from({ length: size }, () => Array(size).fill(null));
+function build(ops, max, nRows, nCols, target) {
+  const grid = Array.from({ length: nRows }, () => Array(nCols).fill(null));
   const eqs = [];
   let first = null;
   for (let k = 0; k < 50 && !first; k++) {
-    first = tryPlace(grid, size, ops, max, Math.floor(size / 2), Math.floor((size - 5) / 2), "H");
+    first = tryPlace(grid, nRows, nCols, ops, max, Math.floor(nRows / 2), Math.floor((nCols - 5) / 2), "H");
   }
   if (!first) return null;
   eqs.push(first);
 
   while (eqs.length < target) {
     const cands = [];
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
+    for (let r = 0; r < nRows; r++) {
+      for (let c = 0; c < nCols; c++) {
         const cell = grid[r][c];
         if (!cell || cell.kind !== "num" || cell.dirs.length !== 1) continue;
         const dir = cell.dirs[0] === "H" ? "V" : "H";
@@ -168,7 +168,7 @@ function build(ops, max, size, target) {
     shuffle(cands);
     let placed = null;
     for (const [r, c, dir] of cands) {
-      placed = tryPlace(grid, size, ops, max, r, c, dir);
+      placed = tryPlace(grid, nRows, nCols, ops, max, r, c, dir);
       if (placed) break;
     }
     if (!placed) break;
@@ -187,14 +187,14 @@ function build(ops, max, size, target) {
   };
 }
 
-function generate(ops, max, level, budgetMs = 3000) {
-  const { size, target } = LEVELS[level];
+function generate(ops, max, { rows, cols, target }, budgetMs = 3000) {
   const t0 = Date.now();
   let best = null;
-  for (let n = 0; n < 40 && Date.now() - t0 < budgetMs; n++) {
-    const p = build(ops, max, size, target);
-    if (p && (!best || p.eqs.length > best.eqs.length)) best = p;
-    if (best && best.eqs.length >= target) break;
+  const score = (p) => p.eqs.length * 100 + p.cols;
+  for (let n = 0; n < 60 && Date.now() - t0 < budgetMs; n++) {
+    const p = build(ops, max, rows, cols, target);
+    if (p && (!best || score(p) > score(best))) best = p;
+    if (best && best.eqs.length >= target && best.cols >= cols - 1) break;
   }
   return best;
 }
@@ -264,7 +264,9 @@ function render() {
       }
       const v = cellValue(idx);
       const blank = state.hidden.has(idx);
-      const cls = "cell num" + (blank ? (v === null ? " blank" : " blank filled") : "") +
+      const len = v === null ? 0 : String(v).length;
+      const cls = "cell num" + (len >= 4 ? " l4" : len === 3 ? " l3" : "") +
+        (blank ? (v === null ? " blank" : " blank filled") : "") +
         (state.selCell === idx ? " selected" : "") + bad;
       html += `<div class="${cls}" data-idx="${idx}">${v === null ? "" : v}</div>`;
     }
@@ -327,6 +329,14 @@ function showBest() {
   $("best").textContent = best ? "Record : " + fmt(best) : "";
 }
 
+// Réduit la grille pour que les cases restent lisibles (>= 32 px) sur petit écran.
+function fitLevel(level) {
+  const L = LEVELS[level];
+  const avail = Math.min(window.innerWidth, 1000) - 24;
+  const cols = Math.min(L.size, Math.max(7, Math.floor(avail / 34)));
+  return { rows: L.size, cols, target: Math.round(L.target * (cols / L.size)) };
+}
+
 function newGame() {
   const s = readSettings();
   if (!s.ops.length) {
@@ -338,7 +348,7 @@ function newGame() {
   setMessage("Génération…");
   // Laisse le navigateur afficher le message avant le calcul.
   setTimeout(() => {
-    const puzzle = generate(s.ops, s.max, s.level);
+    const puzzle = generate(s.ops, s.max, fitLevel(s.level));
     if (!puzzle) {
       setMessage("Impossible de générer une grille avec ces options.", "error");
       return;

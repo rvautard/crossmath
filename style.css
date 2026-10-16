@@ -61,58 +61,79 @@ button {
 }
 
 .grid {
-  --cell: min(64px, calc((min(100vw, 1000px) - 40px) / var(--cols, 9) - 3px));
+  --cell: min(64px, calc((min(100vw, 1000px) - 24px) / var(--cols, 9) - 2px));
   display: grid;
   grid-template-columns: repeat(var(--cols, 9), var(--cell));
   grid-auto-rows: var(--cell);
-  gap: 3px;
+  gap: 2px;
   justify-content: center;
+  touch-action: manipulation;
 }
 
 .cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  font-size: calc(var(--cell) * .38);
+  border-radius: 6px;
+  font-size: calc(var(--cell) * .46);
   font-weight: 600;
   user-select: none;
 }
 
-.cell.block { background: #2b3245; }
+.cell.num.l3 { font-size: calc(var(--cell) * .38); }
+.cell.num.l4 { font-size: calc(var(--cell) * .31); }
 .cell.num { background: #fff; border: 2px solid #c9d2e6; }
 .cell.num.blank { background: #eaf0ff; border: 2px dashed var(--accent); cursor: pointer; }
 .cell.num.filled { color: var(--accent); }
-.cell.num.selected { outline: 3px solid #f5a623; }
-.cell.sym { color: #555; font-size: calc(var(--cell) * .5); }
+.cell.num.selected { outline: 3px solid #f5a623; outline-offset: -1px; }
+.cell.sym { background: #e6ebf7; color: #555; font-size: calc(var(--cell) * .5); }
 .cell.ok.num { border-color: #1a8f3c; background: #e9f8ee; }
-.cell.ok.sym { color: #1a8f3c; }
+.cell.ok.sym { background: #d6f0de; color: #1a8f3c; }
 .cell.bad.num { border-color: #d33; background: #ffecec; }
-.cell.bad.sym { color: #d33; }
+.cell.bad.sym { background: #fbd9d9; color: #d33; }
 
 .bank {
+  position: sticky;
+  bottom: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
   min-height: 56px;
-  margin-top: 20px;
+  margin-top: 12px;
+  padding: 8px 0;
+  background: var(--bg);
+  border-top: 1px solid #c9d2e6;
 }
 
 .tile {
-  min-width: 56px;
-  padding: 10px 12px;
-  font-size: 1.3rem;
+  min-width: 48px;
+  padding: 8px 10px;
+  font-size: 1.2rem;
   font-weight: 600;
   border-radius: 8px;
   background: #fff;
   border: 2px solid var(--accent);
   color: var(--accent);
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .tile.selected { background: #f5a623; border-color: #f5a623; color: #fff; }
 
-.message { min-height: 1.5em; font-size: 1.2rem; font-weight: 600; }
+.message { min-height: 1.5em; margin: 0 0 8px; font-size: 1.1rem; font-weight: 600; }
 .message.win { color: #1a8f3c; }
 .message.error { color: #d33; }
+
+@media (max-width: 600px) {
+  main { padding: 8px 4px; }
+  h1 { margin: 2px 0 8px; font-size: 1.3rem; }
+  .settings { gap: 4px; }
+  fieldset { padding: 0 6px 4px; }
+  legend { font-size: .7rem; }
+  fieldset label { margin: 0 4px; font-size: 1rem; }
+  .status { margin: 8px 0 4px; font-size: 1rem; }
+  button { padding: 6px 10px; font-size: .95rem; }
+  .bank { gap: 4px; min-height: 0; max-height: 26vh; overflow-y: auto; padding: 6px 0; }
+  .tile { min-width: 40px; padding: 5px 8px; font-size: 1.05rem; }
+}
